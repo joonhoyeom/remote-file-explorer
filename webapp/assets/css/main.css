@@ -1,0 +1,45 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+#logo{margin: 0; width: 200px; height: auto;}
+
+#parentbox {
+    display: -webkit-box;
+}
+
+
+#connected-ip-list {
+    float: left;
+    padding: 2rem;
+    padding-top: 32px;
+    width : 300px;
+}
+
+h1 {
+    margin-top: 5rem;
+    margin-left: 5rem;
+    text-align: center;
+}
+
+section{
+    float: left;
+    padding: 2rem;
+    padding-top: 32px;
+    width : 1000px;
+}
+
+footer {
+    margin: 0 auto;
+    padding-top: 64px;
+    max-width: 640px;
+    width: 94%;
+
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 1rem;
+    text-align: center;
+}
