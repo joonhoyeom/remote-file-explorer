@@ -3,12 +3,6 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
-<%--있어야하는 변수목록--%>
-
-<%--connectedIPList--%>
-<%--working directory--%>
-<%--working directory contents--%>
-<%--working ip--%>
 
 <%--작성해야하는 jQuery--%>
 
@@ -44,7 +38,7 @@
 
 <div>
     <nav id="connected-ip-list">
-        <h4>Connected Computers</h4>
+        <h4>Directories</h4>
         <div id="jstree">
             <!-- in this example the tree is populated from inline HTML -->
             <ul>
@@ -65,8 +59,7 @@
     </nav>
     <section id="main-contents">
         <div class="table-responsive">
-            <h4>192.168.0.2</h4>
-            <p>C:\Users\joonho\Desktop</p>
+            <h4 id="currentDir">${currentDirectory}</h4>
             <table class="table table-hover">
                 <thead>
                 <tr>
@@ -78,35 +71,19 @@
                 </thead>
                 <tbody>
                 <tr>
-                    <td><a href="#">..</a></td>
-                    <td> </td>
+                    <td ondblclick="onClickDirEntry(null, 'dir')">..</td>
+                    <td></td>
                     <td>dir</td>
-                    <td> </td>
+                    <td></td>
                 </tr>
-                <tr>
-                    <td><a href="#">technical document</a></td>
-                    <td>2017-04-05 12:05:23</td>
-                    <td>dir</td>
-                    <td> </td>
-                </tr>
-                <tr>
-                    <td><a href="#">flower</a></td>
-                    <td>2017-04-05 12:05:23</td>
-                    <td>jpg</td>
-                    <td> 34561B </td>
-                </tr>
-                <tr>
-                    <td><a href="#">workspace</a></td>
-                    <td>2017-04-05 12:05:23</td>
-                    <td>dir</td>
-                    <td> </td>
-                </tr>
-                <tr>
-                    <td><a href="#">EffectiveJava</a></td>
-                    <td>2017-04-05 12:05:23</td>
-                    <td>pdf</td>
-                    <td> 184361B </td>
-                </tr>
+                <c:forEach items="${dirEntryList }" var="FileMetaInfoVo" varStatus="status">
+                    <tr>
+                        <td ondblclick="onClickDirEntry('${FileMetaInfoVo.name}', '${FileMetaInfoVo.fileType}')">${FileMetaInfoVo.name}</td>
+                        <td>${FileMetaInfoVo.time}</td>
+                        <td>${FileMetaInfoVo.fileType}</td>
+                        <td>${FileMetaInfoVo.size}</td>
+                    </tr>
+                </c:forEach>
                 </tbody>
             </table>
         </div>
@@ -148,20 +125,22 @@
 </script>
 <script type="text/javascript">
     $(document).ready(function () {
-
         $("#btn-submit").click(function () {
+            var currentDir = document.getElementById("currentDir").innerHTML;
             var formData = new FormData();
+            formData.append("savePath", currentDir);
             formData.append("targfile", $("#targfile")[0].files[0]);
             $.ajax({
-                url: "${pageContext.request.contextPath}/~~~",
+                url: "${pageContext.request.contextPath}/file-upload",
                 type: "POST",
+                enctype: 'multipart/form-data',
                 data: formData,
                 dataType: 'json',
                 processData: false,
                 contentType: false,
 
                 success: function (response, textStatus) {
-
+                    console.log('upload-success');
                 },
                 error: function (request, status, error) {
                     console.log(status + ":" + error);
@@ -171,7 +150,70 @@
         });
         return false;
     });
+</script>
 
+
+<script type="text/javascript">
+
+    var onClickDirEntry = function (targName, fileType) {
+        var actionType = null;
+        if (fileType === 'dir')
+            actionType = 'dir';
+        else
+            actionType = 'file-download'
+
+        var formTag = document.createElement("form");
+        formTag.method = "post";
+        formTag.action = "${pageContext.request.contextPath}/" + actionType;
+
+        var currentDir = document.getElementById("currentDir").innerHTML;
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "path";
+        if(targName === null)
+            input.value = currentDir.substring(0, currentDir.lastIndexOf('\\'));
+        else
+            input.value = currentDir + '\\' + targName;
+        formTag.insertBefore(input, null);
+
+        document.body.insertBefore(formTag, null);
+        formTag.submit();
+
+    }
+
+    var getDirEntry = function (targName) {
+        <%--var currentDir = document.getElementById("currentDir").innerHTML;--%>
+        <%--$.ajax({--%>
+        <%--url: "${pageContext.request.contextPath}/dir",--%>
+        <%--type: "POST",--%>
+        <%--data: currentDir + '\\' + targName,--%>
+        <%--dataType: 'json',--%>
+        <%--processData: false,--%>
+        <%--contentType: false,--%>
+
+        <%--success: function (response, textStatus) {--%>
+        <%--dirEntryList = response;--%>
+        <%--},--%>
+        <%--error: function (request, status, error) {--%>
+        <%--console.log(status + ":" + error);--%>
+        <%--console.log("-->code:" + request.status + "\n" + "message:" + request.responseText + "\n" + "error:" + error);--%>
+        <%--}--%>
+        <%--})--%>
+
+        var formTag = document.createElement("form");
+        formTag.method = "post";
+        formTag.action = "${pageContext.request.contextPath}/dir";
+
+        var currentDir = document.getElementById("currentDir").innerHTML;
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "path";
+        input.value = currentDir + '\\' + targName;
+        formTag.insertBefore(input, null);
+
+        document.body.insertBefore(formTag, null);
+        formTag.submit();
+    }
 </script>
 
 </html>
