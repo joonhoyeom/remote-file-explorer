@@ -15,6 +15,19 @@ import java.util.List;
  */
 public class Utils {
 
+    public static boolean move(String curDir, String oldName, String newName){
+        Path oldPath = Paths.get(curDir + "\\" + oldName);
+
+        try {
+            Files.move(oldPath, oldPath.resolveSibling(newName));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
     public static void copyRecursive(Path src, Path targ) throws IOException {
         Files.walkFileTree(src, new SimpleFileVisitor<Path>() {
             @Override
@@ -30,37 +43,6 @@ public class Utils {
                 Path newDir = targ.resolve(src.relativize(dir));
                 Files.createDirectory(newDir);
                 return FileVisitResult.CONTINUE;
-            }
-        });
-    }
-
-    public static void removeRecursive(Path path) throws IOException {
-        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                Files.delete(file);
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                // try to delete the file anyway, even if its attributes
-                // could not be read, since delete-only access is
-                // theoretically possible
-                Files.delete(file);
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                if (exc == null) {
-                    Files.delete(dir);
-                    return FileVisitResult.CONTINUE;
-                }
-                else {
-                    // directory iteration failed; propagate exception
-                    throw exc;
-                }
             }
         });
     }

@@ -45,19 +45,6 @@ public class MainController {
         return "main";
     }
 
-    //    @RequestMapping(value = "/dir", method = RequestMethod.POST)
-//    @ResponseBody
-//    public Map<String, Object> dir(@RequestBody String path) {
-//        System.out.println(path);
-//        Map<String, Object> map = new HashMap<String, Object>();
-//        List<FileMetaInfoVo> list = mainService.dir(path);
-//        if(list !=  null){
-//            map.put("result", "success");
-//            map.put("data", list);
-//        }else
-//            map.put("result", "error");
-//        return map;
-//    }
     @Auth
     @RequestMapping(value = "/dir", method = RequestMethod.POST)
     public String dir(@RequestParam(value = "path") String path, Model model) {
@@ -70,6 +57,26 @@ public class MainController {
         model.addAttribute("dirEntryList", list);
 
         return "main";
+    }
+
+    //todo
+    @Auth
+    @RequestMapping(value = "/ajaxdir", method = RequestMethod.POST)
+    @ResponseBody
+    public Map<String, Object> ajaxDir(@RequestParam(value = "path") String path, Model model) {
+
+        if (path.contains("C:\\") == false)
+            path = "C:\\";
+
+        List<FileMetaInfoVo> list = mainService.dir(path);
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        if (list != null) {
+            map.put("result", "success");
+            map.put("data", list);
+        } else
+            map.put("result", "error");
+        return map;
     }
 
     @Auth
@@ -90,8 +97,6 @@ public class MainController {
             System.out.println("mimetype is not detectable, will take default");
             mimeType = "application/octet-stream";
         }
-
-        System.out.println("mimetype : " + mimeType);
 
         response.setContentType(mimeType);
 
@@ -141,54 +146,55 @@ public class MainController {
         return map;
     }
 
+
     @Auth
     @RequestMapping(value = "/file-upload", method = RequestMethod.POST)
-    @ResponseBody
-    public Map<String, Object> fileUpload(@RequestParam(value="savePath") String savePath, MultipartHttpServletRequest request) {
+    public String fileUpload(@RequestParam(value = "savePath") String savePath, MultipartHttpServletRequest request, Model model) {
         System.out.println(savePath);
         Iterator<String> itr = request.getFileNames();
         MultipartFile mpf = request.getFile(itr.next());
 
         boolean isSaved = Utils.saveMultiPartFile(savePath, mpf);
 
-        Map<String, Object> map = new HashMap<String, Object>();
-
         //multipart file save fail
-        if (isSaved) {
-            System.out.println("Hi");
-            map.put("result", "success");
-        } else {
+        if (isSaved == false){
             System.out.println("[Error] MultipartFile save fail");
-            map.put("result", "fail");
         }
-        return map;
+
+        List<FileMetaInfoVo> list = mainService.dir(savePath);
+        model.addAttribute("currentDirectory", savePath);
+        model.addAttribute("dirEntryList", list);
+
+        return "main";
     }
 
     @Auth
     @RequestMapping(value = "/rename", method = RequestMethod.POST)
-    @ResponseBody
-    public Map<String, Object> rename(@RequestParam(value = "path") String path, Model model) {
-        Map<String, Object> map = new HashMap<String, Object>();
+    public String rename(@RequestParam(value = "cur-dir") String curDir,
+                         @RequestParam(value = "old-name") String oldName,
+                         @RequestParam(value = "new-name") String newName, Model model) {
+        //todo Rename Fail message
+        mainService.rename(curDir, oldName, newName);
+        List<FileMetaInfoVo> list = mainService.dir(curDir);
 
-        return map;
+        model.addAttribute("currentDirectory", curDir);
+        model.addAttribute("dirEntryList", list);
+
+        return "main";
     }
 
     @Auth
     @RequestMapping(value = "/move", method = RequestMethod.POST)
-    @ResponseBody
-    public Map<String, Object> move(@RequestParam(value = "path") String path, Model model) {
-        Map<String, Object> map = new HashMap<String, Object>();
+    public String move(@RequestParam(value = "path") String path, Model model) {
 
-        return map;
+        return "main";
     }
 
     @Auth
     @RequestMapping(value = "/copy", method = RequestMethod.POST)
-    @ResponseBody
-    public Map<String, Object> copy(@RequestParam(value = "path") String path, Model model) {
-        Map<String, Object> map = new HashMap<String, Object>();
+    public String copy(@RequestParam(value = "path") String path, Model model) {
 
-        return map;
+        return "main";
     }
 
 }
