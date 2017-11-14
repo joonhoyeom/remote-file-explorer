@@ -11,4 +11,4 @@
 * how to provide feedback or report bug
 
 * A statement on the life cycle stage of the API
-  eg). prerelease, maintainance, stability, deprecated
+ * eg). prerelease, maintainance, stability, deprecated
